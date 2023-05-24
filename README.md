@@ -11,4 +11,4 @@ To reproduce the issue:
 - Start the docker container:
 ```docker run -i --rm -p 8080:8080 quarkus/quarkus-basic-auth-issue```
 
-- Run the test
+- Run the test: depending on your machine, the failure (unexpected 401) can take time to occur.
