@@ -43,7 +43,7 @@ public class TestResourceTest {
                 .setConnectionManager(cm)
                 .build()) {
             for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-                executorService.submit(sendRequest(httpClient, cm, NUMBER_OF_LOOPS));
+                executorService.submit(sendRequest(httpClient, i, NUMBER_OF_LOOPS));
             }
 
             int receivedCount;
@@ -59,7 +59,7 @@ public class TestResourceTest {
         }
     }
 
-    private Runnable sendRequest(CloseableHttpClient client, PoolingHttpClientConnectionManager cm, int count) {
+    private Runnable sendRequest(CloseableHttpClient client, int threadId, int count) {
         return () -> {
             try {
                 for (int i = 0; i < count; ++i) {
@@ -67,8 +67,9 @@ public class TestResourceTest {
                     final String auth = "admin:password";
                     final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
                     final String authHeader = "Basic " + new String(encodedAuth);
+                    final String requestInternalId = threadId + "-" + i;
                     request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-                    //request.setHeader(HttpHeaders.CONNECTION, "close");
+                    request.setHeader("request_internal_id", requestInternalId);
 
                     try (CloseableHttpResponse response = client.execute(request)) {
                         if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode()) {
@@ -77,6 +78,7 @@ public class TestResourceTest {
                         String msg = EntityUtils.toString(response.getEntity(), "UTF-8");
                         assertEquals("hello", msg);
                     } catch (Exception e) {
+                        logger.error("Caught exception for request " + requestInternalId);
                         exception = e;
                     } finally {
                         responseCount.incrementAndGet();
