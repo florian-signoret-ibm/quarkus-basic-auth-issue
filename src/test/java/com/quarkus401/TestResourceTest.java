@@ -48,7 +48,7 @@ public class TestResourceTest {
 
             int receivedCount;
             do {
-                Thread.sleep(1000);
+                Thread.sleep(500);
                 receivedCount = responseCount.get();
                 logger.info("Received " + receivedCount + " requests out of " + NUMBER_OF_LOOPS * NUMBER_OF_THREADS);
 
